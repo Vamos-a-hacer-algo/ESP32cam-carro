@@ -121,6 +121,13 @@ void loop() {
     if(receivedChar == 'M') {
     Luces_bit = (Luces_bit == 0 ? 1 : 0); // cambia el bit de luces cada vez que sea recibido el caracter M
     digitalWrite(Luces_Pin, Luces_bit);
+      //if (Luces_bit) {
+       // Serial.print("Led On");
+      //}
+      //else {
+        //Serial.print("Led Off");
+      //}
+    
     }
   }
 
