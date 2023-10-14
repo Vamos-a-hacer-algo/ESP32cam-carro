@@ -174,7 +174,7 @@ void ultrasonico() {
   delayMicroseconds (10);
   digitalWrite (TRIG_Pin, LOW); 
 
-  tiempo_espera = pulseIn(ECHO_Pin, HIGH);
+  tiempo_espera = pulseIn(ECHO_Pin, HIGH, 20);
 
   distancia = timeToCm(tiempo_espera);
 
