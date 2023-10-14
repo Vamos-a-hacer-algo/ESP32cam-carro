@@ -181,7 +181,7 @@ void ultrasonico() {
   SerialBT.print('D');  
   SerialBT.println(distancia);  
 }
-
+//
 float timeToCm(float time) {
   return (time / 2.0) / 29.15;
 }
