@@ -1,225 +1,121 @@
 #include <Arduino.h>
 #include "BluetoothSerial.h"
-//#include "esp_camera.h"
-//#include <WiFi.h>
-//#include "esp_timer.h"
-//#include "img_converters.h"
-//#include "fb_gfx.h"
-//#include "soc/soc.h"            //disable brownout problems
-//#include "soc/rtc_cntl_reg.h"   //disable brownout problems
-//#include "esp_http_server.h"
 
 BluetoothSerial SerialBT;
 
-char caracterRecibido;  //Caracter enviado desde la app
-int automatico = 0;     //Modo de operacion (seguidor de linea o manual)
-int luces_bit = 0;      //Control de luces
-float tiempo_espera;    //Salida sensor ultrasonico
-float distancia;        //Distancia medida por el ultrasonico
+char receivedChar;// received value will be stored as CHAR in this variable
 
-const int MRP = 15;     //ESP32 pins (MR=Right Motor) (ML=Left Motor) (P=Positivo) (N=Negativo)
-const int MRN = 14; 
-const int MLP = 12;
-const int MLN = 13;
-
-const int LUCES = 2;  //Pin para controlar luces 
-const int BUZZER = 4; //Pin para controlar buzzer
-
-const int TRIG = 16; // Pines del para el sensor ultrasonico
-const int ECHO = 0;
-
-const int INFRAIZQ = 3; //Pines para los sensores
-const int INFRADER = 1;
-
-//Control ruedas
-void Forward();
-void Backward();
-void Left();
-void Right();
-void Stop();
-void ForwardLeft();
-void ForwardRight();
-void BackwardLeft();
-void BackwardRight();
-
-void ultrasonico(); //Rutina de lectura del ultrasonico
-float timeToCm(float time);
-
+const int MR1 = 15; //ESP32 pins (MR=Right Motor) (ML=Left Motor) (1=Forward) (2=Backward)
+const int MR2 = 14; 
+const int ML1 = 12;
+const int ML2 = 13;
 
 void setup() {
   Serial.begin(115200);
-  SerialBT.begin("Carrito ESP32 Normal"); //Nombre del dispositivo Bluetooth
-
-  pinMode(MRP, OUTPUT); 
-  pinMode(MRN, OUTPUT);
-  pinMode(MLP, OUTPUT);
-  pinMode(MLN, OUTPUT);
-  pinMode(LUCES, OUTPUT);
-  pinMode(BUZZER, OUTPUT);
-  pinMode(TRIG, OUTPUT);
-  pinMode(ECHO, INPUT);
-  pinMode(INFRAIZQ, INPUT);
-  pinMode(INFRADER, INPUT);
-}
-
-void loop() {
-  if (Serial.available()) {
-    SerialBT.write(Serial.read());  //Manda info desde el terminal del VScode hasta la app
-  }
-
-  if (SerialBT.available()) {
-    caracterRecibido = (char)SerialBT.read(); //Lee informacion de la app
-  }
-
-  Serial.print("Received:");           //print on serial monitor
-  Serial.println(caracterRecibido);    //print on serial monitor    
-
-  if(caracterRecibido == 'Y') {
-    automatico = (automatico == 0 ? 1 : 0); //automatico = 0, el carro está en manual. automatico = 1, el carro está en automatico
-  }
-
-  if(caracterRecibido == 'M') {
-    luces_bit = (luces_bit == 0 ? 1 : 0); // cambia el bit de luces cada vez que sea recibido el caracter M
-  }
-
-  if(caracterRecibido == 'X') {
-    //buzzer_bit = (buzzer_bit == 0 ? 1 : 0);
-    digitalWrite(BUZZER,HIGH);
-    delay(500);
-    digitalWrite(BUZZER,LOW);
-  }
-
-  if(automatico) {  //Si esta en modo seguidor de linea (automatico)
-    if(!INFRAIZQ && !INFRADER) {
-      Forward();  
-    } else if(!INFRAIZQ && INFRADER) {
-      Right();
-    } else if(INFRAIZQ && !INFRADER) {
-      Left();
-    } else {
-      Stop();
-    }
-  } else {  //Si esta en modo manual
-    if(caracterRecibido == 'F') {
-      Forward();
-    }
-    if(caracterRecibido == 'G') {
-      Backward(); 
-    }         
-    if(caracterRecibido == 'L') {
-      Left();
-    }        
-    if(caracterRecibido == 'R') {
-      Right(); 
-    }
-    if(caracterRecibido == 'Q') {
-      ForwardLeft();
-    }
-    if(caracterRecibido == 'E') {
-      ForwardRight();
-    }
-    if(caracterRecibido == 'Z') {
-      BackwardLeft();
-    }
-    if(caracterRecibido == 'C') {
-      BackwardRight();
-    }
-    if(caracterRecibido == 'S') {
-      Stop();
-    }
-  }
-
-  digitalWrite(LUCES, luces_bit ? HIGH : LOW);
-
-  //digitalWrite(BUZZER, buzzer_bit ? HIGH : LOW);
-
-  ultrasonico();
-
-  delay(50);
+  SerialBT.begin("CARRITO"); //You can change your Bluetooth device name
+  pinMode(MR1, OUTPUT); 
+  pinMode(MR2, OUTPUT);
+  pinMode(ML1, OUTPUT);
+  pinMode(ML2, OUTPUT);
 }
 
 void Forward() {
-  //RIGHT MOTORS
-  digitalWrite(MRP,HIGH);
-  digitalWrite(MRN,LOW);
-  //LEFT MOTORS
-  digitalWrite(MLP,HIGH);
-  digitalWrite(MLN,LOW);
+      //RIGHT MOTOR
+      digitalWrite(MR1,HIGH);
+      digitalWrite(MR2,LOW);
+      //LEFT MOTOR
+      digitalWrite(ML1,HIGH);
+      digitalWrite(ML2,LOW);
 }
-
 void Backward() {
-  digitalWrite(MRP,LOW);
-  digitalWrite(MRN,HIGH);
-  digitalWrite(MLP,LOW);
-  digitalWrite(MLN,HIGH);
+      digitalWrite(MR1,LOW);
+      digitalWrite(MR2,HIGH);
+      digitalWrite(ML1,LOW);
+      digitalWrite(ML2,HIGH);
 }
-
 void Left() {
-  digitalWrite(MRP,HIGH);
-  digitalWrite(MRN,LOW);
-  digitalWrite(MLP,LOW);
-  digitalWrite(MLN,HIGH);
+      digitalWrite(MR1,HIGH);
+      digitalWrite(MR2,LOW);
+      digitalWrite(ML1,LOW);
+      digitalWrite(ML2,HIGH);
 }
-
 void Right() {
-  digitalWrite(MRP,LOW);
-  digitalWrite(MRN,HIGH);
-  digitalWrite(MLP,HIGH);
-  digitalWrite(MLN,LOW);
+      digitalWrite(MR1,LOW);
+      digitalWrite(MR2,HIGH);
+      digitalWrite(ML1,HIGH);
+      digitalWrite(ML2,LOW);
 }
-
 void Stop() {
-  digitalWrite(MRP,LOW); 
-  digitalWrite(MRN,LOW);
-  digitalWrite(MLP,LOW); 
-  digitalWrite(MLN,LOW); 
+      digitalWrite(MR1,LOW); 
+      digitalWrite(MR2,LOW);
+      digitalWrite(ML1,LOW); 
+      digitalWrite(ML2,LOW); 
 }
-
 void ForwardLeft() {
-  digitalWrite(MRP,HIGH); 
-  digitalWrite(MRN,LOW);
-  digitalWrite(MLP,LOW); 
-  digitalWrite(MLN,LOW);
+  digitalWrite(MR1,HIGH); 
+  digitalWrite(MR2,LOW);
+  digitalWrite(ML1,LOW); 
+  digitalWrite(ML2,LOW);
 }
-
 void ForwardRight() {
-  digitalWrite(MRP,LOW); 
-  digitalWrite(MRN,LOW);
-  digitalWrite(MLP,HIGH); 
-  digitalWrite(MLN,LOW);
+  digitalWrite(MR1,LOW); 
+  digitalWrite(MR2,LOW);
+  digitalWrite(ML1,HIGH); 
+  digitalWrite(ML2,LOW);
 }
-
 void BackwardLeft() {
-  digitalWrite(MRP,LOW); 
-  digitalWrite(MRN,HIGH);
-  digitalWrite(MLP,LOW); 
-  digitalWrite(MLN,LOW);
+  digitalWrite(MR1,LOW); 
+  digitalWrite(MR2,HIGH);
+  digitalWrite(ML1,LOW); 
+  digitalWrite(ML2,LOW);
 }
-
 void BackwardRight() {
-  digitalWrite(MRP,LOW); 
-  digitalWrite(MRN,LOW);
-  digitalWrite(MLP,LOW); 
-  digitalWrite(MLN,HIGH);
+  digitalWrite(MR1,LOW); 
+  digitalWrite(MR2,LOW);
+  digitalWrite(ML1,LOW); 
+  digitalWrite(ML2,HIGH);
 }
+void loop() {
+  receivedChar =(char)SerialBT.read();
 
-void ultrasonico() {
-  digitalWrite (TRIG, LOW); 
-  delayMicroseconds(2);
-  digitalWrite (TRIG, HIGH);
-  delayMicroseconds (10);
-  digitalWrite (TRIG, LOW); 
+  if (Serial.available()) {
+    SerialBT.write(Serial.read());
+  }
 
-  tiempo_espera = pulseIn(ECHO, HIGH);
+  if (SerialBT.available()) {
+     
+    Serial.print ("Received:");//print on serial monitor
+    Serial.println(receivedChar);//print on serial monitor    
+    
+    if(receivedChar == 'F') {
+      Forward();
+    }
+    if(receivedChar == 'G') {
+      Backward(); 
+    }         
+     if(receivedChar == 'L') {
+      Left();
+    }        
+    if(receivedChar == 'R') {
+      Right(); 
+    }
+    if(receivedChar == 'Q') {
+      ForwardLeft();
+    }
+    if(receivedChar == 'E') {
+      ForwardRight();
+    }
+    if(receivedChar == 'Z') {
+      BackwardLeft();
+    }
+    if(receivedChar == 'C') {
+      BackwardRight();
+    }
+    if(receivedChar == 'S') {
+      Stop();
+    }
+  }
 
-  distancia = timeToCm(tiempo_espera);
-
-  SerialBT.print('D');  
-  SerialBT.println(distancia);  
+  delay(20);
 }
-
-float timeToCm(float time) {
-  return (time / 2.0) / 29.15;
-}
-
  
