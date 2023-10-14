@@ -174,7 +174,7 @@ float measureDistance() {
   delayMicroseconds (10);
   digitalWrite (TRIG_Pin, LOW); 
 
-  tiempo_espera = pulseIn(ECHO_Pin, HIGH);
+  tiempo_espera = pulseIn(ECHO_Pin, HIGH,20);
 
   return timeToCm(tiempo_espera);
  
