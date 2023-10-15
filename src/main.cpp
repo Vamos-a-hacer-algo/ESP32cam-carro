@@ -54,20 +54,6 @@ void loop() {
   receivedChar =(char)SerialBT.read();
   ultrasonico(); //Mide distancia
 
-  if (Serial.available()) {
-
-    SerialBT.write(Serial.read());
-  }
-
-  if (SerialBT.available()) {
-     
-    Serial.print ("Received:");//print on serial monitor
-    Serial.println(receivedChar);//print on serial monitor  
-
-  if(receivedChar == 'Y') { //Modo del carro
-    modo = (modo == 0 ? 1 : 0); //modo = 0, el carro está en manual. modo = 1, el carro está en automatico
-  }
-    
   if (modo) { //Automatico
     if(!INFRAIZQ_Pin && !INFRADER_Pin) {
       Forward();  
@@ -79,83 +65,95 @@ void loop() {
       Stop();
     }
   }
-  else { //Manual
-    if(receivedChar == 'F') {
-      Forward();
-    }
-    if(receivedChar == 'G') {
-      Backward(); 
-    }         
-     if(receivedChar == 'L') {
-      Left();
-    }        
-    if(receivedChar == 'R') {
-      Right(); 
-    }
-    if(receivedChar == 'Q') {
-      ForwardLeft();
-    }
-    if(receivedChar == 'E') {
-      ForwardRight();
-    }
-    if(receivedChar == 'Z') {
-      BackwardLeft();
-    }
-    if(receivedChar == 'C') {
-      BackwardRight();
-    }
-    if(receivedChar == 'S') {
-      Stop();
-    }
+
+  if (Serial.available()) {
+    SerialBT.write(Serial.read());
   }
 
-  if(receivedChar == 'M') { //Luces
-    Luces_bit = (Luces_bit == 0 ? 1 : 0); // cambia el bit de luces cada vez que sea recibido el caracter M
-    digitalWrite(Luces_Pin, Luces_bit);
+  if (SerialBT.available()) {
+     
+    Serial.print ("Received:");//print on serial monitor
+    Serial.println(receivedChar);//print on serial monitor  
+
+    if(receivedChar == 'Y') { //Modo del carro
+      modo = (modo == 0 ? 1 : 0); //modo = 0, el carro está en manual. modo = 1, el carro está en automatico
+    }
+    
+    if (!modo) { //Manual
+      if(receivedChar == 'F') {
+        Forward();
+      }
+      if(receivedChar == 'G') {
+        Backward(); 
+      }         
+      if(receivedChar == 'L') {
+        Left();
+      }        
+      if(receivedChar == 'R') {
+        Right(); 
+      }
+      if(receivedChar == 'Q') {
+        ForwardLeft();
+      }
+      if(receivedChar == 'E') {
+        ForwardRight();
+      }
+      if(receivedChar == 'Z') {
+        BackwardLeft();
+      }
+      if(receivedChar == 'C') {
+        BackwardRight();
+      }
+      if(receivedChar == 'S') {
+        Stop();
+      }
     }
 
+    if(receivedChar == 'M') { //Luces
+      Luces_bit = (Luces_bit == 0 ? 1 : 0); // cambia el bit de luces cada vez que sea recibido el caracter M
+      digitalWrite(Luces_Pin, Luces_bit);
     }
 
-  if (receivedChar == 'X') { //Corneta
-    digitalWrite(Buzzer_Pin, HIGH);
-    delay(500);
-    digitalWrite(Buzzer_Pin, LOW);      
+    if (receivedChar == 'X') { //Corneta
+      digitalWrite(Buzzer_Pin, HIGH);
+      delay(500);
+      digitalWrite(Buzzer_Pin, LOW);      
     }
-
-  delay(20);
+    delay(20);
+  }
 }
 
 void Forward() {
-      //RIGHT MOTOR
-      digitalWrite(MR1_Pin,HIGH);
-      digitalWrite(MR2_Pin,LOW);
-      //LEFT MOTOR
-      digitalWrite(ML1_Pin,HIGH);
-      digitalWrite(ML2_Pin,LOW);
+  //RIGHT MOTOR
+  digitalWrite(MR1_Pin,HIGH);
+  digitalWrite(MR2_Pin,LOW);
+  //LEFT MOTOR
+  digitalWrite(ML1_Pin,HIGH);
+  digitalWrite(ML2_Pin,LOW);
 }
 void Backward() {
-      digitalWrite(MR1_Pin,LOW);
-      digitalWrite(MR2_Pin,HIGH);
-      digitalWrite(ML1_Pin,LOW);
-      digitalWrite(ML2_Pin,HIGH);
+  digitalWrite(MR1_Pin,LOW);
+  digitalWrite(MR2_Pin,HIGH);
+  digitalWrite(ML1_Pin,LOW);
+  digitalWrite(ML2_Pin,HIGH);
 }
 void Left() {
-      digitalWrite(MR1_Pin,HIGH);
-      digitalWrite(MR2_Pin,LOW);
-      digitalWrite(ML1_Pin,LOW);
-      digitalWrite(ML2_Pin,HIGH);
+  digitalWrite(MR1_Pin,HIGH);
+  digitalWrite(MR2_Pin,LOW);
+  digitalWrite(ML1_Pin,LOW);
+  digitalWrite(ML2_Pin,HIGH);
 }
 void Right() {
-      digitalWrite(MR1_Pin,LOW);
-      digitalWrite(MR2_Pin,HIGH);
-      digitalWrite(ML1_Pin,HIGH);
-      digitalWrite(ML2_Pin,LOW);
+  digitalWrite(MR1_Pin,LOW);
+  digitalWrite(MR2_Pin,HIGH);
+  digitalWrite(ML1_Pin,HIGH);
+  digitalWrite(ML2_Pin,LOW);
 }
 void Stop() {
-      digitalWrite(MR1_Pin,LOW); 
-      digitalWrite(MR2_Pin,LOW);
-      digitalWrite(ML1_Pin,LOW); 
-      digitalWrite(ML2_Pin,LOW); 
+  digitalWrite(MR1_Pin,LOW); 
+  digitalWrite(MR2_Pin,LOW);
+  digitalWrite(ML1_Pin,LOW); 
+  digitalWrite(ML2_Pin,LOW); 
 }
 void ForwardLeft() {
   digitalWrite(MR1_Pin,HIGH); 
