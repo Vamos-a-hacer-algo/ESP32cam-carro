@@ -11,11 +11,14 @@ const int Luces_Pin = 2;
 const int Buzzer_Pin = 4;
 const int TRIG_Pin = 16; // Pines del para el sensor ultrasonico
 const int ECHO_Pin = 0;
+const int INFRAIZQ_Pin = 3; //Pines para los sensores
+const int INFRADER_Pin = 1;
 
 char receivedChar;      // received value will be stored as CHAR in this variable
 int Luces_bit = 0;      //Estado de las luces
 float tiempo_espera;    //Salida sensor ultrasonico
 float distancia;        //Distancia medida por el ultrasonico
+int modo = 0;           //En 0 es manual y 1 es automatico
 
 //Control ruedas
 void Forward();
@@ -27,37 +30,56 @@ void ForwardLeft();
 void ForwardRight();
 void BackwardLeft();
 void BackwardRight();
-
-void ultrasonico(); //Rutina de lectura del ultrasonico
+//Rutina de lectura del ultrasonico
+void ultrasonico(); 
 float timeToCm(float time);
 
 void setup() {
   Serial.begin(115200);
-  SerialBT.begin("CARRITO"); //You can change your Bluetooth device name
+  SerialBT.begin("ESP32 CAR"); //Nombre del dispositivo Bluetooth
   pinMode(MR1_Pin, OUTPUT); 
   pinMode(MR2_Pin, OUTPUT);
   pinMode(ML1_Pin, OUTPUT);
   pinMode(ML2_Pin, OUTPUT);
   pinMode(Luces_Pin, OUTPUT);
   pinMode(Buzzer_Pin, OUTPUT);
-  pinMode(ECHO_Pin, OUTPUT);
+  pinMode(ECHO_Pin, INPUT);
   pinMode(TRIG_Pin, OUTPUT);
+  pinMode(INFRAIZQ_Pin, INPUT);
+  pinMode(INFRADER_Pin, INPUT);
 }
 
 
 void loop() {
   receivedChar =(char)SerialBT.read();
-  ultrasonico();
+  ultrasonico(); //Mide distancia
 
   if (Serial.available()) {
+
     SerialBT.write(Serial.read());
   }
 
   if (SerialBT.available()) {
      
     Serial.print ("Received:");//print on serial monitor
-    Serial.println(receivedChar);//print on serial monitor    
+    Serial.println(receivedChar);//print on serial monitor  
+
+  if(receivedChar == 'Y') { //Modo del carro
+    modo = (modo == 0 ? 1 : 0); //modo = 0, el carro está en manual. modo = 1, el carro está en automatico
+  }
     
+  if (modo) { //Automatico
+    if(!INFRAIZQ_Pin && !INFRADER_Pin) {
+      Forward();  
+    } else if(!INFRAIZQ_Pin && INFRADER_Pin) {
+      Right();
+    } else if(INFRAIZQ_Pin && !INFRADER_Pin) {
+      Left();
+    } else {
+      Stop();
+    }
+  }
+  else { //Manual
     if(receivedChar == 'F') {
       Forward();
     }
@@ -85,26 +107,18 @@ void loop() {
     if(receivedChar == 'S') {
       Stop();
     }
-    if(receivedChar == 'M') {
+  }
+
+  if(receivedChar == 'M') { //Luces
     Luces_bit = (Luces_bit == 0 ? 1 : 0); // cambia el bit de luces cada vez que sea recibido el caracter M
     digitalWrite(Luces_Pin, Luces_bit);
-      //if (Luces_bit) {
-       // Serial.print("Led On");
-      //}
-      //else {
-        //Serial.print("Led Off");
-      //}
-    
     }
 
-    if (receivedChar == 'X') { 
-      digitalWrite(Buzzer_Pin, HIGH);
-      delay(500);
-      digitalWrite(Buzzer_Pin, LOW);      
+  if (receivedChar == 'X') { //Corneta
+    digitalWrite(Buzzer_Pin, HIGH);
+    delay(500);
+    digitalWrite(Buzzer_Pin, LOW);      
     }
-
-
-    
   }
 
   delay(20);
