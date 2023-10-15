@@ -114,12 +114,13 @@ void loop() {
     digitalWrite(Luces_Pin, Luces_bit);
     }
 
+    }
+
   if (receivedChar == 'X') { //Corneta
     digitalWrite(Buzzer_Pin, HIGH);
     delay(500);
     digitalWrite(Buzzer_Pin, LOW);      
     }
-  }
 
   delay(20);
 }
