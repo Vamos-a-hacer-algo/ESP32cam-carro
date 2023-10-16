@@ -11,14 +11,16 @@ const int Luces_Pin = 2;
 const int Buzzer_Pin = 4;
 const int TRIG_Pin = 16; // Pines del para el sensor ultrasonico
 const int ECHO_Pin = 0;
-const int INFRAIZQ_Pin = 3; //Pines para los sensores
-const int INFRADER_Pin = 1;
+const int INFRAIZQ_Pin = 32; //Pines para los sensores
+const int INFRADER_Pin = 33;
 
 char receivedChar;      // received value will be stored as CHAR in this variable
 int Luces_bit = 0;      //Estado de las luces
 float tiempo_espera;    //Salida sensor ultrasonico
 float distancia;        //Distancia medida por el ultrasonico
 int modo = 0;           //En 0 es manual y 1 es automatico
+int INFRAIZQ_bit;
+int INFRADER_bit;
 
 //Control ruedas
 void Forward();
@@ -53,13 +55,15 @@ void setup() {
 void loop() {
   receivedChar =(char)SerialBT.read();
   ultrasonico(); //Mide distancia
+  INFRADER_bit = digitalRead(INFRADER_Pin);
+  INFRAIZQ_bit = digitalRead(INFRAIZQ_Pin);
 
   if (modo) { //Automatico
-    if(!INFRAIZQ_Pin && !INFRADER_Pin) {
+    if(!INFRAIZQ_bit && !INFRADER_bit) {
       Forward();  
-    } else if(!INFRAIZQ_Pin && INFRADER_Pin) {
+    } else if(!INFRAIZQ_bit && INFRADER_bit) {
       Right();
-    } else if(INFRAIZQ_Pin && !INFRADER_Pin) {
+    } else if(INFRAIZQ_bit && !INFRADER_bit) {
       Left();
     } else {
       Stop();
