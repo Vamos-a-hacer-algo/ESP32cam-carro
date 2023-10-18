@@ -3,21 +3,21 @@
 
 BluetoothSerial SerialBT;
 
-const int MR1_Pin = 15; //ESP32 pins (MR=Right Motor) (ML=Left Motor) (1=Forward) (2=Backward)
-const int MR2_Pin = 14; 
-const int ML1_Pin = 12;
-const int ML2_Pin = 13;
+const int MR1_Pin = 13; //ESP32 pins (MR=Right Motor) (ML=Left Motor) (1=Forward) (2=Backward)
+const int MR2_Pin = 12; 
+const int ML1_Pin = 15;
+const int ML2_Pin = 14;
 const int Luces_Pin = 2;
 const int Buzzer_Pin = 4;
-const int TRIG_Pin = 16; // Pines del para el sensor ultrasonico
+const int TRIG_Pin = 16;      // Pines del para el sensor ultrasonico
 const int ECHO_Pin = 0;
 const int INFRAIZQ_Pin = 32; //Pines para los sensores
 const int INFRADER_Pin = 33;
 
-char receivedChar;      // received value will be stored as CHAR in this variable
-int Luces_bit = 0;      //Estado de las luces
-float tiempo_espera;    //Salida sensor ultrasonico
-float distancia;        //Distancia medida por el ultrasonico
+char receivedChar;           // received value will be stored as CHAR in this variable
+int Luces_bit = 0;           //Estado de las luces
+float tiempo_espera;          //Salida sensor ultrasonico
+float distancia;             //Distancia medida por el ultrasonico
 int modo = 0;           //En 0 es manual y 1 es automatico
 int INFRAIZQ_bit;
 int INFRADER_bit;
