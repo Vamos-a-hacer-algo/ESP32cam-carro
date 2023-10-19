@@ -55,7 +55,7 @@ void setup() {
 
 
 void loop() {
-  receivedChar =(char)SerialBT.read();
+  
   ultrasonico(); //Mide distancia
   INFRADER_bit = digitalRead(INFRADER_Pin);
   INFRAIZQ_bit = digitalRead(INFRAIZQ_Pin);
@@ -77,9 +77,13 @@ void loop() {
   }
 
   if (SerialBT.available()) {
-     
-    Serial.print ("Received:");//print on serial monitor
-    Serial.println(receivedChar);//print on serial monitor  
+    
+    receivedChar =(char)SerialBT.read();
+
+    if(receivedChar != '\n') {
+      Serial.print ("Received:");//print on serial monitor
+      Serial.println(receivedChar);//print on serial monitor 
+      } 
 
     if(receivedChar == 'Y') { //Modo del carro
       if (modo) {
@@ -89,7 +93,6 @@ void loop() {
       else {
         modo = 1;
       } 
-      //modo = (modo == 0 ? 1 : 0); //modo = 0, el carro está en manual. modo = 1, el carro está en automatico
     }
     
     if (!modo) { //Manual
@@ -129,13 +132,7 @@ void loop() {
     
     if (receivedChar == 'X') { //Corneta
       digitalWrite(Buzzer_Pin, HIGH);
-      Buzzer_bit = 1;
-      //delay(500);
-      //digitalWrite(Buzzer_Pin, LOW);     
-      Serial.print("ENCENDIDO"); 
     }
-    
-    
     delay(20);
   }
   unsigned long msegf = millis(); // Tiempo actual en milisegundos
@@ -143,8 +140,6 @@ void loop() {
       if(msegf - msegi >= 500 ) {
         msegi = msegf;
         digitalWrite(Buzzer_Pin, LOW);
-        Buzzer_bit = 0;
-        Serial.print("APAGADO");
       }
     }
 }
