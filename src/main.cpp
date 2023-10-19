@@ -16,7 +16,6 @@ const int INFRADER_Pin = 33;
 
 char receivedChar;           // received value will be stored as CHAR in this variable
 int Luces_bit = 0;           //Estado de las luces
-int Buzzer_bit = 0;
 float tiempo_espera;          //Salida sensor ultrasonico
 float distancia;             //Distancia medida por el ultrasonico
 int modo = 0;           //En 0 es manual y 1 es automatico
@@ -141,7 +140,7 @@ void loop() {
       mseg_Buzzer = millis();
     }
   }
-    if (Buzzer_bit) {
+    if (digitalRead(Buzzer_Pin)) {
       if(millis() - mseg_Buzzer >= 1000 ) {
         digitalWrite(Buzzer_Pin, LOW);
       }
