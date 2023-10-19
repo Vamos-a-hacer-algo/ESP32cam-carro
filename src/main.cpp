@@ -35,6 +35,7 @@ void ForwardRight();
 void BackwardLeft();
 void BackwardRight();
 //Rutina de lectura del ultrasonico
+
 void ultrasonico(); 
 float timeToCm(float time);
 
@@ -55,8 +56,10 @@ void setup() {
 
 
 void loop() {
+  if(millis() - msegi >= 20) {
+    ultrasonico(); //Mide distancia
+  }
   
-  ultrasonico(); //Mide distancia
   INFRADER_bit = digitalRead(INFRADER_Pin);
   INFRAIZQ_bit = digitalRead(INFRAIZQ_Pin);
 
@@ -133,12 +136,9 @@ void loop() {
     if (receivedChar == 'X') { //Corneta
       digitalWrite(Buzzer_Pin, HIGH);
     }
-    delay(20);
   }
-  unsigned long msegf = millis(); // Tiempo actual en milisegundos
     if (Buzzer_bit) {
-      if(msegf - msegi >= 500 ) {
-        msegi = msegf;
+      if(millis() - msegi >= 1000 ) {
         digitalWrite(Buzzer_Pin, LOW);
       }
     }
