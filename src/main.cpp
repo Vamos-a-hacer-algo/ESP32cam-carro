@@ -57,7 +57,7 @@ void setup() {
 
 
 void loop() {
-  if(millis() - mseg_Ultrasonico >= 20) {
+  if(millis() - mseg_Ultrasonico >= 700) {
     ultrasonico(); //Mide distancia
     mseg_Ultrasonico = millis();
   }
