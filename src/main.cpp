@@ -22,7 +22,9 @@ float distancia;             //Distancia medida por el ultrasonico
 int modo = 0;           //En 0 es manual y 1 es automatico
 int INFRAIZQ_bit;
 int INFRADER_bit;
-unsigned long msegi = 0;
+unsigned long msegi1 = 0;
+unsigned long msegi2 = 0;
+
 
 //Control ruedas
 void Forward();
@@ -56,8 +58,9 @@ void setup() {
 
 
 void loop() {
-  if(millis() - msegi >= 20) {
+  if(millis() - msegi2 >= 20) {
     ultrasonico(); //Mide distancia
+    msegi2 = millis();
   }
   
   INFRADER_bit = digitalRead(INFRADER_Pin);
@@ -138,8 +141,9 @@ void loop() {
     }
   }
     if (Buzzer_bit) {
-      if(millis() - msegi >= 1000 ) {
+      if(millis() - msegi1 >= 1000 ) {
         digitalWrite(Buzzer_Pin, LOW);
+        msegi1 = millis();
       }
     }
 }
