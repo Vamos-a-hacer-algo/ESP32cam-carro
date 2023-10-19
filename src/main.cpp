@@ -80,7 +80,14 @@ void loop() {
     Serial.println(receivedChar);//print on serial monitor  
 
     if(receivedChar == 'Y') { //Modo del carro
-      modo = (modo == 0 ? 1 : 0); //modo = 0, el carro está en manual. modo = 1, el carro está en automatico
+      if (modo) {
+        modo = 0;
+        Stop();
+      }
+      else {
+        modo = 1;
+      } 
+      //modo = (modo == 0 ? 1 : 0); //modo = 0, el carro está en manual. modo = 1, el carro está en automatico
     }
     
     if (!modo) { //Manual
