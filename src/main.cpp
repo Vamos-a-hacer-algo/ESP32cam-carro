@@ -137,8 +137,8 @@ void loop() {
     }
     
     if (receivedChar == 'X') { //Corneta
-      mseg_Buzzer = millis();
       digitalWrite(Buzzer_Pin, HIGH);
+      mseg_Buzzer = millis();
     }
   }
     if (Buzzer_bit) {
