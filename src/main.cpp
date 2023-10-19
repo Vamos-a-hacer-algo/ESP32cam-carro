@@ -16,11 +16,13 @@ const int INFRADER_Pin = 33;
 
 char receivedChar;           // received value will be stored as CHAR in this variable
 int Luces_bit = 0;           //Estado de las luces
+int Buzzer_bit = 0;
 float tiempo_espera;          //Salida sensor ultrasonico
 float distancia;             //Distancia medida por el ultrasonico
 int modo = 0;           //En 0 es manual y 1 es automatico
 int INFRAIZQ_bit;
 int INFRADER_bit;
+unsigned long msegi = 0;
 
 //Control ruedas
 void Forward();
@@ -124,14 +126,27 @@ void loop() {
       Luces_bit = (Luces_bit == 0 ? 1 : 0); // cambia el bit de luces cada vez que sea recibido el caracter M
       digitalWrite(Luces_Pin, Luces_bit);
     }
-
+    
     if (receivedChar == 'X') { //Corneta
       digitalWrite(Buzzer_Pin, HIGH);
-      delay(500);
-      digitalWrite(Buzzer_Pin, LOW);      
+      Buzzer_bit = 1;
+      //delay(500);
+      //digitalWrite(Buzzer_Pin, LOW);     
+      Serial.print("ENCENDIDO"); 
     }
+    
+    
     delay(20);
   }
+  unsigned long msegf = millis(); // Tiempo actual en milisegundos
+    if (Buzzer_bit) {
+      if(msegf - msegi >= 500 ) {
+        msegi = msegf;
+        digitalWrite(Buzzer_Pin, LOW);
+        Buzzer_bit = 0;
+        Serial.print("APAGADO");
+      }
+    }
 }
 
 void Forward() {
