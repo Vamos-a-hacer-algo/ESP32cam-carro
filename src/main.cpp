@@ -21,8 +21,8 @@ float distancia;             //Distancia medida por el ultrasonico
 int modo = 0;           //En 0 es manual y 1 es automatico
 int INFRAIZQ_bit;
 int INFRADER_bit;
-unsigned long mseg_Ultrasonico = 0;
-unsigned long mseg_Buzzer = 0;
+uint32_t mseg_Ultrasonico = 0;
+uint32_t mseg_Buzzer = 0;
 
 
 //Control ruedas
@@ -131,7 +131,7 @@ void loop() {
     }
 
     if(receivedChar == 'M') { //Luces
-      Luces_bit = (Luces_bit == 0 ? 1 : 0); // cambia el bit de luces cada vez que sea recibido el caracter M
+      Luces_bit = ~Luces_bit; // cambia el bit de luces cada vez que sea recibido el caracter M
       digitalWrite(Luces_Pin, Luces_bit);
     }
     
