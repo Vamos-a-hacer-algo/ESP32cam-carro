@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "BluetoothSerial.h"
+#include <HardwareSerial.h>
 
 BluetoothSerial SerialBT;
 
@@ -7,12 +8,13 @@ const int MR1_Pin = 13; //ESP32 pins (MR=Right Motor) (ML=Left Motor) (1=Forward
 const int MR2_Pin = 12; 
 const int ML1_Pin = 15;
 const int ML2_Pin = 14;
-const int Luces_Pin = 2;
 const int Buzzer_Pin = 4;
 const int TRIG_Pin = 16;      // Pines del para el sensor ultrasonico
 const int ECHO_Pin = 0;
 const int INFRAIZQ_Pin = 32; //Pines para los sensores
 const int INFRADER_Pin = 33;
+const int RXD1 = 3;
+const int TXD1 = 1;
 
 char receivedChar;           // received value will be stored as CHAR in this variable
 int Luces_bit = 0;           //Estado de las luces
@@ -43,6 +45,7 @@ float timeToCm(float time);
 void setup() {
   Serial.begin(115200);
   SerialBT.begin("ESP32 CAR"); //Nombre del dispositivo Bluetooth
+  Serial1.begin(115200, SERIAL_8N1, RXD1, TXD1); //Inicio de la comunicación serial con el pico
   pinMode(MR1_Pin, OUTPUT); 
   pinMode(MR2_Pin, OUTPUT);
   pinMode(ML1_Pin, OUTPUT);
@@ -84,6 +87,7 @@ void loop() {
   if (SerialBT.available()) {
     
     receivedChar =(char)SerialBT.read();
+    Serial1.write(receivedChar); //Envio a RasberryPi Pico
 
     if(receivedChar != '\n') {
       Serial.print ("Received:");//print on serial monitor
@@ -128,11 +132,6 @@ void loop() {
       if(receivedChar == 'S') {
         Stop();
       }
-    }
-
-    if(receivedChar == 'M') { //Luces
-      Luces_bit = ~Luces_bit; // cambia el bit de luces cada vez que sea recibido el caracter M
-      digitalWrite(Luces_Pin, Luces_bit);
     }
     
     if (receivedChar == 'X') { //Corneta
