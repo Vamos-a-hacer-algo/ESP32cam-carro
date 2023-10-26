@@ -4,13 +4,14 @@
 
 BluetoothSerial SerialBT;
 
+//Pines libres 4
+
 const int MR1_Pin = 13; //ESP32 pins (MR=Right Motor) (ML=Left Motor) (1=Forward) (2=Backward)
 const int MR2_Pin = 12; 
 const int ML1_Pin = 15;
 const int ML2_Pin = 14;
-const int Buzzer_Pin = 4;
 const int TRIG_Pin = 16;      // Pines del para el sensor ultrasonico
-const int ECHO_Pin = 0;
+const int ECHO_Pin = 2;
 const int INFRAIZQ_Pin = 32; //Pines para los sensores
 const int INFRADER_Pin = 33;
 const int RXD1 = 3;
@@ -23,6 +24,7 @@ float distancia;             //Distancia medida por el ultrasonico
 int modo = 0;           //En 0 es manual y 1 es automatico
 int INFRAIZQ_bit;
 int INFRADER_bit;
+int Buzzer_bit = 0;
 uint32_t mseg_Ultrasonico = 0;
 uint32_t mseg_Buzzer = 0;
 
@@ -50,8 +52,6 @@ void setup() {
   pinMode(MR2_Pin, OUTPUT);
   pinMode(ML1_Pin, OUTPUT);
   pinMode(ML2_Pin, OUTPUT);
-  pinMode(Luces_Pin, OUTPUT);
-  pinMode(Buzzer_Pin, OUTPUT);
   pinMode(ECHO_Pin, INPUT);
   pinMode(TRIG_Pin, OUTPUT);
   pinMode(INFRAIZQ_Pin, INPUT);
@@ -135,13 +135,15 @@ void loop() {
     }
     
     if (receivedChar == 'X') { //Corneta
-      digitalWrite(Buzzer_Pin, HIGH);
+      Buzzer_bit = 1;
       mseg_Buzzer = millis();
     }
   }
-    if (digitalRead(Buzzer_Pin)) {
+    if ((Buzzer_bit)) {
       if(millis() - mseg_Buzzer >= 1000 ) {
-        digitalWrite(Buzzer_Pin, LOW);
+        char send = 'X';
+        Serial1.write(send);
+        Buzzer_bit = 0;
       }
     }
 }
