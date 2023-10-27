@@ -4,12 +4,10 @@
 
 BluetoothSerial SerialBT;
 
-//Pines libres 4
+//Pines libres 4, 13, 12, 15, 14
 
-const int MR1_Pin = 13; //ESP32 pins (MR=Right Motor) (ML=Left Motor) (1=Forward) (2=Backward)
-const int MR2_Pin = 12; 
-const int ML1_Pin = 15;
-const int ML2_Pin = 14;
+//Pico pins (MR=Right Motor) (ML=Left Motor) (1=Forward) (2=Backward)
+
 const int TRIG_Pin = 16;      // Pines del para el sensor ultrasonico
 const int ECHO_Pin = 2;
 const int INFRAIZQ_Pin = 32; //Pines para los sensores
@@ -29,16 +27,7 @@ uint32_t mseg_Ultrasonico = 0;
 uint32_t mseg_Buzzer = 0;
 
 
-//Control ruedas
-void Forward();
-void Backward();
-void Left();
-void Right();
-void Stop();
-void ForwardLeft();
-void ForwardRight();
-void BackwardLeft();
-void BackwardRight();
+
 //Rutina de lectura del ultrasonico
 
 void ultrasonico(); 
@@ -48,10 +37,7 @@ void setup() {
   Serial.begin(115200);
   SerialBT.begin("ESP32 CAR"); //Nombre del dispositivo Bluetooth
   Serial1.begin(115200, SERIAL_8N1, RXD1, TXD1); //Inicio de la comunicación serial con el pico
-  pinMode(MR1_Pin, OUTPUT); 
-  pinMode(MR2_Pin, OUTPUT);
-  pinMode(ML1_Pin, OUTPUT);
-  pinMode(ML2_Pin, OUTPUT);
+  
   pinMode(ECHO_Pin, INPUT);
   pinMode(TRIG_Pin, OUTPUT);
   pinMode(INFRAIZQ_Pin, INPUT);
@@ -70,13 +56,13 @@ void loop() {
 
   if (modo) { //Automatico
     if(!INFRAIZQ_bit && !INFRADER_bit) {
-      Forward();  
+      Serial1.write('F');
     } else if(!INFRAIZQ_bit && INFRADER_bit) {
-      Right();
+      Serial1.write('R');
     } else if(INFRAIZQ_bit && !INFRADER_bit) {
-      Left();
+      Serial1.write('L');
     } else {
-      Stop();
+      Serial1.write('S');
     }
   }
 
@@ -97,7 +83,7 @@ void loop() {
     if(receivedChar == 'Y') { //Modo del carro
       if (modo) {
         modo = 0;
-        Stop();
+        Serial1.write('S');
       }
       else {
         modo = 1;
@@ -106,31 +92,31 @@ void loop() {
     
     if (!modo) { //Manual
       if(receivedChar == 'F') {
-        Forward();
+        Serial1.write('F');
       }
       if(receivedChar == 'G') {
-        Backward(); 
+        Serial1.write('G');
       }         
       if(receivedChar == 'L') {
-        Left();
+        Serial1.write('L');
       }        
       if(receivedChar == 'R') {
-        Right(); 
+        Serial1.write('R');
       }
       if(receivedChar == 'Q') {
-        ForwardLeft();
+        Serial1.write('Q');
       }
       if(receivedChar == 'E') {
-        ForwardRight();
+        Serial1.write('E');
       }
       if(receivedChar == 'Z') {
-        BackwardLeft();
+        Serial1.write('Z');
       }
       if(receivedChar == 'C') {
-        BackwardRight();
+        Serial1.write('C');
       }
       if(receivedChar == 'S') {
-        Stop();
+        Serial1.write('S');
       }
     }
     
@@ -146,63 +132,6 @@ void loop() {
         Buzzer_bit = 0;
       }
     }
-}
-
-void Forward() {
-  //RIGHT MOTOR
-  digitalWrite(MR1_Pin,HIGH);
-  digitalWrite(MR2_Pin,LOW);
-  //LEFT MOTOR
-  digitalWrite(ML1_Pin,HIGH);
-  digitalWrite(ML2_Pin,LOW);
-}
-void Backward() {
-  digitalWrite(MR1_Pin,LOW);
-  digitalWrite(MR2_Pin,HIGH);
-  digitalWrite(ML1_Pin,LOW);
-  digitalWrite(ML2_Pin,HIGH);
-}
-void Left() {
-  digitalWrite(MR1_Pin,HIGH);
-  digitalWrite(MR2_Pin,LOW);
-  digitalWrite(ML1_Pin,LOW);
-  digitalWrite(ML2_Pin,HIGH);
-}
-void Right() {
-  digitalWrite(MR1_Pin,LOW);
-  digitalWrite(MR2_Pin,HIGH);
-  digitalWrite(ML1_Pin,HIGH);
-  digitalWrite(ML2_Pin,LOW);
-}
-void Stop() {
-  digitalWrite(MR1_Pin,LOW); 
-  digitalWrite(MR2_Pin,LOW);
-  digitalWrite(ML1_Pin,LOW); 
-  digitalWrite(ML2_Pin,LOW); 
-}
-void ForwardLeft() {
-  digitalWrite(MR1_Pin,HIGH); 
-  digitalWrite(MR2_Pin,LOW);
-  digitalWrite(ML1_Pin,LOW); 
-  digitalWrite(ML2_Pin,LOW);
-}
-void ForwardRight() {
-  digitalWrite(MR1_Pin,LOW); 
-  digitalWrite(MR2_Pin,LOW);
-  digitalWrite(ML1_Pin,HIGH); 
-  digitalWrite(ML2_Pin,LOW);
-}
-void BackwardLeft() {
-  digitalWrite(MR1_Pin,LOW); 
-  digitalWrite(MR2_Pin,HIGH);
-  digitalWrite(ML1_Pin,LOW); 
-  digitalWrite(ML2_Pin,LOW);
-}
-void BackwardRight() {
-  digitalWrite(MR1_Pin,LOW); 
-  digitalWrite(MR2_Pin,LOW);
-  digitalWrite(ML1_Pin,LOW); 
-  digitalWrite(ML2_Pin,HIGH);
 }
 
 void ultrasonico() {
