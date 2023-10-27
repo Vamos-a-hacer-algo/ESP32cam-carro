@@ -14,8 +14,8 @@ const int TRIG_Pin = 16;      // Pines del para el sensor ultrasonico
 const int ECHO_Pin = 2;
 const int INFRAIZQ_Pin = 32; //Pines para los sensores
 const int INFRADER_Pin = 33;
-const int RXD1 = 3;
-const int TXD1 = 1;
+const int RXD1 = 13;
+const int TXD1 = 12;
 
 char receivedChar;           // received value will be stored as CHAR in this variable
 int Luces_bit = 0;           //Estado de las luces
