@@ -4,7 +4,7 @@ import time
 uart = UART (1, baudrate=115200, tx=Pin(4), rx=Pin(5))
 uart.init(bits=8, parity=None, stop=2)
 
-led=Pin("LED", Pin.OUT)
+led=Pin(2, Pin.OUT)
 buzzer=Pin(2, Pin.OUT)
 MR1=Pin(11,Pin.OUT) 
 MR2=Pin(10, Pin.OUT)
@@ -17,12 +17,10 @@ while True:
     if uart.any():
         data = uart.read()
         print (data)
-        if data==b'M\n':
+        if data==b'M':
             led.toggle();
-        if data==b'X\n':
-            buzzer.value(1);
         if data==b'X':
-            buzzer.value(0);
+            buzzer.toggle();
         if data=='F':
             MR1.value(1)
             MR2.value(0)

@@ -56,6 +56,7 @@ void loop() {
   INFRADER_bit = digitalRead(INFRADER_Pin);
   INFRAIZQ_bit = digitalRead(INFRAIZQ_Pin);
 
+
   if (modo) { //Automatico
     if(!INFRAIZQ_bit && !INFRADER_bit) {
       Serial1.write('F');
@@ -75,13 +76,17 @@ void loop() {
   if (SerialBT.available()) {
     
     receivedChar =(char)SerialBT.read();
-    Serial1.write(receivedChar); //Envio a RasberryPi Pico
+    //Serial1.write(receivedChar); //Envio a RasberryPi Pico
 
     if(receivedChar != '\n') {
       Serial.print ("Received:");//print on serial monitor
       Serial.println(receivedChar);//print on serial monitor 
-      } 
+      }
 
+     if(receivedChar == 'M') {
+      Serial1.write('M');
+     }
+    
     if(receivedChar == 'Y') { //Modo del carro
       if (modo) {
         modo = 0;
@@ -123,6 +128,7 @@ void loop() {
     }
     
     if (receivedChar == 'X') { //Corneta
+      Serial1.write('X');
       Buzzer_bit = 1;
       mseg_Buzzer = millis();
     }
@@ -134,6 +140,7 @@ void loop() {
         Buzzer_bit = 0;
       }
     }
+  delay(20);
 }
 
 void ultrasonico() {
