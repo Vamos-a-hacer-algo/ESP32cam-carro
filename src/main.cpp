@@ -4,6 +4,8 @@
 
 BluetoothSerial SerialBT;
 
+//Hola
+
 //Pines libres 4, 13, 12, 15, 14
 
 //Pico pins (MR=Right Motor) (ML=Left Motor) (1=Forward) (2=Backward)
