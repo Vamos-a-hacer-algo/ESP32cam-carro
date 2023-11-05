@@ -10,12 +10,12 @@ BluetoothSerial SerialBT;
 
 //Pico pins (MR=Right Motor) (ML=Left Motor) (1=Forward) (2=Backward)
 
-const int TRIG_Pin = 16;      // Pines del para el sensor ultrasonico
-const int ECHO_Pin = 2;
-const int INFRAIZQ_Pin = 32; //Pines para los sensores
-const int INFRADER_Pin = 33;
-const int RXD1 = 13;
-const int TXD1 = 12;
+const int TRIG_Pin = 19;      // Pines del para el sensor ultrasonico
+const int ECHO_Pin = 21;
+const int INFRAIZQ_Pin = 18; //Pines para los sensores
+const int INFRADER_Pin = 5;
+const int RXD1 = 16;
+const int TXD1 = 17;
 
 char receivedChar;           // received value will be stored as CHAR in this variable
 int Luces_bit = 0;           //Estado de las luces
@@ -127,7 +127,7 @@ void loop() {
       }
     }
     
-    if (receivedChar == 'X') { //Corneta
+    if (receivedChar == 'X' && !Buzzer_bit) { //Corneta
       Serial1.write('X');
       Buzzer_bit = 1;
       mseg_Buzzer = millis();
