@@ -1,8 +1,10 @@
 #include <Arduino.h>
 #include "BluetoothSerial.h"
-#include <HardwareSerial.h>
+#include <SoftwareSerial.h>
+
 
 BluetoothSerial SerialBT;
+SoftwareSerial mySerial(12, 13); // RX, TX
 
 //Hola x3
 
@@ -35,10 +37,12 @@ uint32_t mseg_Buzzer = 0;
 void ultrasonico(); 
 float timeToCm(float time);
 
+
 void setup() {
   Serial.begin(115200);
-  SerialBT.begin("ESP32 CAR"); //Nombre del dispositivo Bluetooth
-  Serial1.begin(115200, SERIAL_8N1, RXD1, TXD1); //Inicio de la comunicación serial con el pico
+  mySerial.begin(4800, SWSERIAL_7E2);
+  SerialBT.begin("ESP32cam CAR"); //Nombre del dispositivo Bluetooth
+  //mySerial.begin(115200, SERIAL_8N1, RXD1, TXD1); //Inicio de la comunicación serial con el pico
   
   pinMode(ECHO_Pin, INPUT);
   pinMode(TRIG_Pin, OUTPUT);
@@ -59,13 +63,13 @@ void loop() {
 
   if (modo) { //Automatico
     if(!INFRAIZQ_bit && !INFRADER_bit) {
-      Serial1.write('F');
+      mySerial.write('F');
     } else if(!INFRAIZQ_bit && INFRADER_bit) {
-      Serial1.write('R');
+      mySerial.write('R');
     } else if(INFRAIZQ_bit && !INFRADER_bit) {
-      Serial1.write('L');
+      mySerial.write('L');
     } else {
-      Serial1.write('S');
+      mySerial.write('S');
     }
   }
 
@@ -76,7 +80,7 @@ void loop() {
   if (SerialBT.available()) {
     
     receivedChar =(char)SerialBT.read();
-    //Serial1.write(receivedChar); //Envio a RasberryPi Pico
+    //mySerial.write(receivedChar); //Envio a RasberryPi Pico
 
     if(receivedChar != '\n') {
       Serial.print ("Received:");//print on serial monitor
@@ -84,13 +88,13 @@ void loop() {
       }
 
      if(receivedChar == 'M') {
-      Serial1.write('M');
+      mySerial.write('M');
      }
     
     if(receivedChar == 'Y') { //Modo del carro
       if (modo) {
         modo = 0;
-        Serial1.write('S');
+        mySerial.write('S');
       }
       else {
         modo = 1;
@@ -99,36 +103,36 @@ void loop() {
     
     if (!modo) { //Manual
       if(receivedChar == 'F') {
-        Serial1.write('F');
+        mySerial.write('F');
       }
       if(receivedChar == 'G') {
-        Serial1.write('G');
+        mySerial.write('G');
       }         
       if(receivedChar == 'L') {
-        Serial1.write('L');
+        mySerial.write('L');
       }        
       if(receivedChar == 'R') {
-        Serial1.write('R');
+        mySerial.write('R');
       }
       if(receivedChar == 'Q') {
-        Serial1.write('Q');
+        mySerial.write('Q');
       }
       if(receivedChar == 'E') {
-        Serial1.write('E');
+        mySerial.write('E');
       }
       if(receivedChar == 'Z') {
-        Serial1.write('Z');
+        mySerial.write('Z');
       }
       if(receivedChar == 'C') {
-        Serial1.write('C');
+        mySerial.write('C');
       }
       if(receivedChar == 'S') {
-        Serial1.write('S');
+        mySerial.write('S');
       }
     }
     
     if (receivedChar == 'X' && !Buzzer_bit) { //Corneta
-      Serial1.write('X');
+      mySerial.write('X');
       Buzzer_bit = 1;
       mseg_Buzzer = millis();
     }
@@ -136,7 +140,7 @@ void loop() {
     if ((Buzzer_bit)) {
       if(millis() - mseg_Buzzer >= 1000 ) {
         char send = 'X';
-        Serial1.write(send);
+        mySerial.write(send);
         Buzzer_bit = 0;
       }
     }
