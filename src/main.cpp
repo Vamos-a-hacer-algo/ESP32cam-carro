@@ -4,7 +4,7 @@
 
 BluetoothSerial SerialBT;
 
-//Hola x2
+//Hola
 
 //Pines libres 4, 13, 12, 15, 14
 
