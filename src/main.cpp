@@ -4,17 +4,18 @@
 
 BluetoothSerial SerialBT;
 
-const int MR1_Pin = 13; //ESP32 pins (MR=Right Motor) (ML=Left Motor) (1=Forward) (2=Backward)
-const int MR2_Pin = 12; 
-const int ML1_Pin = 15;
-const int ML2_Pin = 14;
-const int Buzzer_Pin = 4;
-const int TRIG_Pin = 16;      // Pines del para el sensor ultrasonico
-const int ECHO_Pin = 0;
-const int INFRAIZQ_Pin = 32; //Pines para los sensores
-const int INFRADER_Pin = 33;
-const int RXD1 = 3;
-const int TXD1 = 1;
+//Hola
+
+//Pines libres 4, 13, 12, 15, 14
+
+//Pico pins (MR=Right Motor) (ML=Left Motor) (1=Forward) (2=Backward)
+
+const int TRIG_Pin = 19;      // Pines del para el sensor ultrasonico
+const int ECHO_Pin = 21;
+const int INFRAIZQ_Pin = 18; //Pines para los sensores
+const int INFRADER_Pin = 5;
+const int RXD1 = 16;
+const int TXD1 = 17;
 
 char receivedChar;           // received value will be stored as CHAR in this variable
 int Luces_bit = 0;           //Estado de las luces
@@ -23,20 +24,12 @@ float distancia;             //Distancia medida por el ultrasonico
 int modo = 0;           //En 0 es manual y 1 es automatico
 int INFRAIZQ_bit;
 int INFRADER_bit;
+int Buzzer_bit = 0;
 uint32_t mseg_Ultrasonico = 0;
 uint32_t mseg_Buzzer = 0;
 
 
-//Control ruedas
-void Forward();
-void Backward();
-void Left();
-void Right();
-void Stop();
-void ForwardLeft();
-void ForwardRight();
-void BackwardLeft();
-void BackwardRight();
+
 //Rutina de lectura del ultrasonico
 
 void ultrasonico(); 
@@ -46,12 +39,7 @@ void setup() {
   Serial.begin(115200);
   SerialBT.begin("ESP32 CAR"); //Nombre del dispositivo Bluetooth
   Serial1.begin(115200, SERIAL_8N1, RXD1, TXD1); //Inicio de la comunicación serial con el pico
-  pinMode(MR1_Pin, OUTPUT); 
-  pinMode(MR2_Pin, OUTPUT);
-  pinMode(ML1_Pin, OUTPUT);
-  pinMode(ML2_Pin, OUTPUT);
-  pinMode(Luces_Pin, OUTPUT);
-  pinMode(Buzzer_Pin, OUTPUT);
+  
   pinMode(ECHO_Pin, INPUT);
   pinMode(TRIG_Pin, OUTPUT);
   pinMode(INFRAIZQ_Pin, INPUT);
@@ -68,15 +56,16 @@ void loop() {
   INFRADER_bit = digitalRead(INFRADER_Pin);
   INFRAIZQ_bit = digitalRead(INFRAIZQ_Pin);
 
+
   if (modo) { //Automatico
     if(!INFRAIZQ_bit && !INFRADER_bit) {
-      Forward();  
+      Serial1.write('F');
     } else if(!INFRAIZQ_bit && INFRADER_bit) {
-      Right();
+      Serial1.write('R');
     } else if(INFRAIZQ_bit && !INFRADER_bit) {
-      Left();
+      Serial1.write('L');
     } else {
-      Stop();
+      Serial1.write('S');
     }
   }
 
@@ -87,17 +76,21 @@ void loop() {
   if (SerialBT.available()) {
     
     receivedChar =(char)SerialBT.read();
-    Serial1.write(receivedChar); //Envio a RasberryPi Pico
+    //Serial1.write(receivedChar); //Envio a RasberryPi Pico
 
     if(receivedChar != '\n') {
       Serial.print ("Received:");//print on serial monitor
       Serial.println(receivedChar);//print on serial monitor 
-      } 
+      }
 
+     if(receivedChar == 'M') {
+      Serial1.write('M');
+     }
+    
     if(receivedChar == 'Y') { //Modo del carro
       if (modo) {
         modo = 0;
-        Stop();
+        Serial1.write('S');
       }
       else {
         modo = 1;
@@ -106,101 +99,48 @@ void loop() {
     
     if (!modo) { //Manual
       if(receivedChar == 'F') {
-        Forward();
+        Serial1.write('F');
       }
       if(receivedChar == 'G') {
-        Backward(); 
+        Serial1.write('G');
       }         
       if(receivedChar == 'L') {
-        Left();
+        Serial1.write('L');
       }        
       if(receivedChar == 'R') {
-        Right(); 
+        Serial1.write('R');
       }
       if(receivedChar == 'Q') {
-        ForwardLeft();
+        Serial1.write('Q');
       }
       if(receivedChar == 'E') {
-        ForwardRight();
+        Serial1.write('E');
       }
       if(receivedChar == 'Z') {
-        BackwardLeft();
+        Serial1.write('Z');
       }
       if(receivedChar == 'C') {
-        BackwardRight();
+        Serial1.write('C');
       }
       if(receivedChar == 'S') {
-        Stop();
+        Serial1.write('S');
       }
     }
     
-    if (receivedChar == 'X') { //Corneta
-      digitalWrite(Buzzer_Pin, HIGH);
+    if (receivedChar == 'X' && !Buzzer_bit) { //Corneta
+      Serial1.write('X');
+      Buzzer_bit = 1;
       mseg_Buzzer = millis();
     }
   }
-    if (digitalRead(Buzzer_Pin)) {
+    if ((Buzzer_bit)) {
       if(millis() - mseg_Buzzer >= 1000 ) {
-        digitalWrite(Buzzer_Pin, LOW);
+        char send = 'X';
+        Serial1.write(send);
+        Buzzer_bit = 0;
       }
     }
-}
-
-void Forward() {
-  //RIGHT MOTOR
-  digitalWrite(MR1_Pin,HIGH);
-  digitalWrite(MR2_Pin,LOW);
-  //LEFT MOTOR
-  digitalWrite(ML1_Pin,HIGH);
-  digitalWrite(ML2_Pin,LOW);
-}
-void Backward() {
-  digitalWrite(MR1_Pin,LOW);
-  digitalWrite(MR2_Pin,HIGH);
-  digitalWrite(ML1_Pin,LOW);
-  digitalWrite(ML2_Pin,HIGH);
-}
-void Left() {
-  digitalWrite(MR1_Pin,HIGH);
-  digitalWrite(MR2_Pin,LOW);
-  digitalWrite(ML1_Pin,LOW);
-  digitalWrite(ML2_Pin,HIGH);
-}
-void Right() {
-  digitalWrite(MR1_Pin,LOW);
-  digitalWrite(MR2_Pin,HIGH);
-  digitalWrite(ML1_Pin,HIGH);
-  digitalWrite(ML2_Pin,LOW);
-}
-void Stop() {
-  digitalWrite(MR1_Pin,LOW); 
-  digitalWrite(MR2_Pin,LOW);
-  digitalWrite(ML1_Pin,LOW); 
-  digitalWrite(ML2_Pin,LOW); 
-}
-void ForwardLeft() {
-  digitalWrite(MR1_Pin,HIGH); 
-  digitalWrite(MR2_Pin,LOW);
-  digitalWrite(ML1_Pin,LOW); 
-  digitalWrite(ML2_Pin,LOW);
-}
-void ForwardRight() {
-  digitalWrite(MR1_Pin,LOW); 
-  digitalWrite(MR2_Pin,LOW);
-  digitalWrite(ML1_Pin,HIGH); 
-  digitalWrite(ML2_Pin,LOW);
-}
-void BackwardLeft() {
-  digitalWrite(MR1_Pin,LOW); 
-  digitalWrite(MR2_Pin,HIGH);
-  digitalWrite(ML1_Pin,LOW); 
-  digitalWrite(ML2_Pin,LOW);
-}
-void BackwardRight() {
-  digitalWrite(MR1_Pin,LOW); 
-  digitalWrite(MR2_Pin,LOW);
-  digitalWrite(ML1_Pin,LOW); 
-  digitalWrite(ML2_Pin,HIGH);
+  delay(20);
 }
 
 void ultrasonico() {
