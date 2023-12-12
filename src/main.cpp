@@ -31,6 +31,8 @@ const int TXD1 = 17;
 char receivedChar;           // Caracter recibido por la aplicación
 int Luces_bit = 0;           // Estado de las luces (0 == OFF; 1 == ON)
 int Buzzer_bit = 0;          // Estado del buzzer (0 == OFF; 1 == ON)
+int hubo_cambio;            //Para detectar si hubo un cambio en el estado de los infrarrojos
+int primera = 1;            //Denota que es la primera leída de los infrarrojos
 
 // Estado de los infrarrojos
 int INFRAIZQ_bit;
@@ -70,10 +72,14 @@ void loop() {
   }
   
   // Rutina de lectura de los infrarrojos
+  //Determina si el estado actual de los infrarrojos es diferente al que se leyó en el ultimo ciclo
+  hubo_cambio = (INFRADER_bit != digitalRead(INFRADER_Pin)) || (INFRAIZQ_bit != digitalRead(INFRAIZQ_Pin));
+
   INFRADER_bit = digitalRead(INFRADER_Pin);
   INFRAIZQ_bit = digitalRead(INFRAIZQ_Pin);
 
-  if (modo) { //Automatico
+  if (modo && (primera || hubo_cambio)) { //Si está en modo automatico,
+    //y hubo cambio en los infrarrojos o es la primera leída...
     if(!INFRAIZQ_bit && !INFRADER_bit) {
       Serial1.write('F');
     } else if(!INFRAIZQ_bit && INFRADER_bit) {
@@ -83,7 +89,15 @@ void loop() {
     } else {
       Serial1.write('S');
     }
+    if(primera) { //Ya no es la primera
+      primera = 0;
+    }
   }
+
+  if (!modo && !primera) {
+    primera = 1;
+  }
+  
   // Este if sirve para enviar comandos desde la computadora hacia la aplicación
   if (Serial.available()) {        // Si se envían datos desde la computadora...
     SerialBT.write(Serial.read()); // Se reenvían directo a la app
@@ -185,7 +199,7 @@ void ultrasonico() {
 
   // Se transforma la respuesta a unidad de distancia
   distancia = timeToCm(tiempo_espera);
-  
+
   // Se manda la información a la app
   SerialBT.print('D');  
   SerialBT.println(distancia);  
