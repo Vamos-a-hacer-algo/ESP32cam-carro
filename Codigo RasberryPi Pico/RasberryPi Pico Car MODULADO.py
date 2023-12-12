@@ -4,14 +4,17 @@ import time
 uart = UART (1, baudrate=115200, tx=Pin(4), rx=Pin(5))
 uart.init(bits=7, parity=None, stop=2)
 
-led=Pin("LED", Pin.OUT)
+led=Pin("LED", Pin.OUT) # Led integrado del Pico
 buzzer=Pin(2, Pin.OUT)
+# Pines ruedas
 MR1=Pin(11,Pin.OUT) 
 MR2=Pin(10, Pin.OUT)
 ML1=Pin(12,Pin.OUT)
 ML2=Pin(13,Pin.OUT)
-MOTOR= Pin(15, Pin.OUT)
-pwm = machine.PWM(MOTOR)
+
+MOTOR= Pin(15, Pin.OUT) # Habilitación de los motores
+
+pwm = machine.PWM(MOTOR)    # Objeto que maneja el PWM de la habilitación de los motores
 pwm.freq(50)
 
 modo=0
