@@ -2,6 +2,9 @@
 #include "BluetoothSerial.h"
 #include <HardwareSerial.h>
 
+#define ESPERA_US 700                   // Tiempo entre lecturas del ultrasónico
+#define ESPERA_BUZZER 1000              // Tiempo de encendido del buzzer
+
 BluetoothSerial SerialBT;
 
 // Pines seguros CAM: 2, 12, 13, 14, 15, 16
@@ -11,7 +14,6 @@ BluetoothSerial SerialBT;
 // ********** DECLARACIÓN DE PINES **********
 
 // Pines para el sensor ultrasonico
-
 const int TRIG_Pin = 19;
 const int ECHO_Pin = 21;
 
@@ -31,17 +33,17 @@ const int TXD1 = 17;
 char receivedChar;           // Caracter recibido por la aplicación
 int Luces_bit = 0;           // Estado de las luces (0 == OFF; 1 == ON)
 int Buzzer_bit = 0;          // Estado del buzzer (0 == OFF; 1 == ON)
-int hubo_cambio;            //Para detectar si hubo un cambio en el estado de los infrarrojos
-int primera = 1;            //Denota que es la primera leída de los infrarrojos
+int hubo_cambio;             // Para detectar si hubo un cambio en el estado de los infrarrojos
+int primera = 1;             // Denota que es la primera leída de los infrarrojos
 
 // Estado de los infrarrojos
 int INFRAIZQ_bit;
 int INFRADER_bit;
 // (0 == detecta; 1 == no detecta)
 
-float tiempo_espera;         //Salida sensor ultrasonico
-float distancia;             //Distancia medida por el ultrasonico  (Luego de convertir tiempo a distancia)
-int modo = 0;                //Modo de operación del carrito. 0 es manual y 1 es automático
+float tiempo_espera;         // Salida sensor ultrasonico
+float distancia;             // Distancia medida por el ultrasonico  (Luego de convertir tiempo a distancia)
+int modo = 0;                // Modo de operación del carrito. 0 es manual y 1 es automático
 
 uint32_t mseg_Ultrasonico = 0;  // Momento entre la última medida del ultrasónico y la próxima
 uint32_t mseg_Buzzer = 0;       // Momento desde el encendido del buzzer
@@ -66,7 +68,7 @@ void setup() {
 
 void loop() {
   // Rutina de lectura del ultrasónico
-  if(millis() - mseg_Ultrasonico >= 700) { // Si pasa el tiempo apropiado desde la última lectura...
+  if(millis() - mseg_Ultrasonico >= ESPERA_US) { // Si pasa el tiempo apropiado desde la última lectura...
     ultrasonico();                        // Haz la rutina del ultrasónico
     mseg_Ultrasonico = millis();          // Actualiza el momento de la última lectura
   }
@@ -177,9 +179,7 @@ void loop() {
   }
    // Aquí se controla el tiempo de encendido del buzzer
   if ((Buzzer_bit)) { // Si el buzzer está encendido
-    if(millis() - mseg_Buzzer >= 1000 ) { // Si pasa el tiempo suficiente desde el encendido del buzzer...
-      char send = 'X'; 
-      Serial1.write(send); // Apagalo
+    if(millis() - mseg_Buzzer >= ESPERA_BUZZER ) { // Si pasa el tiempo suficiente desde el encendido del buzzer...
       Buzzer_bit = 0; // Y actualiza la bandera de estado correspondiente
     }
   }
@@ -195,17 +195,17 @@ void ultrasonico() {
   digitalWrite (TRIG_Pin, LOW); 
 
   // Se mide la respuesta del ultrasónico
-  tiempo_espera = pulseIn(ECHO_Pin, HIGH, 20);
+  tiempo_espera = pulseIn(ECHO_Pin, HIGH);
 
   // Se transforma la respuesta a unidad de distancia
   distancia = timeToCm(tiempo_espera);
 
   // Se manda la información a la app
   SerialBT.print('D');  
-  SerialBT.println(distancia);  
+  SerialBT.println(distancia);
 }
 
 float timeToCm(float time) {
-  return (time / 2.0) / 29.15;
+  return ((time / 2.0) / 29.15);
 }
  

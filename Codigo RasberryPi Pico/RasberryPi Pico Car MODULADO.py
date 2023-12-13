@@ -26,7 +26,9 @@ while True:
         if data==b'M':
             led.toggle();
         if data==b'X':
-            buzzer.toggle();
+            buzzer.value(1);
+            time.sleep(1);
+            buzzer.value(0);
         if data==b'F':
             MOTOR.low()
             pwm.duty_u16(20574)
